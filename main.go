@@ -29,6 +29,7 @@ type Feature struct {
 	DataRow    []object.TableData `json:"data_row"`
 	FilePath   string             `json:"file_path"`
 	Scenario   *object.Scenario   `json:"-"`
+	Background *object.Background `json:"-"`
 }
 
 type shift struct {
@@ -175,6 +176,23 @@ func checkAnd() error {
 			}
 		}
 
+		if (feature.Background != nil) {
+			var backgroundLastToken token.Type
+			for _, s := range feature.Background.Steps {
+				if backgroundLastToken == token.GIVEN || backgroundLastToken == token.WHEN || backgroundLastToken == token.THEN {
+					if backgroundLastToken == s.Token.Type {
+						updates = append(updates, update{
+							s.Token.Type.String(),
+							s.Token.LineNumber,
+						})
+					}
+				}
+				if (s.Token.Type != token.AND) {
+					backgroundLastToken = s.Token.Type
+				}
+			}
+		}
+
 		input, err := ioutil.ReadFile(feature.FilePath)
 		if err != nil {
 			return err
@@ -208,7 +226,7 @@ func main() {
 		getShifts()
 	case "inspect":
 		checkDuplicates()
-	case "check_and":
+	case "check-and":
 		checkAnd()
 	case "scan":
 		scanForNewScenarios()
@@ -231,7 +249,7 @@ func dataRowSame(d1, d2 []object.TableData) bool {
 	return true
 }
 
-func getFeatures() []Feature {
+func getFeatures() ([]Feature) {
 	featuresPath := os.Getenv("FEATURES_PATH")
 
 	if featuresPath == "" {
@@ -306,11 +324,11 @@ func getFeaturesFromFile(filePath string) []Feature {
 				if isOutline {
 					for i, s := range outlineObj.GetScenarios() {
 
-						features = append(features, Feature{Outline, s.LineNumber, s.ScenarioText, outlineObj.Table[i+1], filePath, &s})
+						features = append(features, Feature{Outline, s.LineNumber, s.ScenarioText, outlineObj.Table[i+1], filePath, &s, feature.Background})
 					}
 				} else {
 					s, _ := scenario.(*object.Scenario)
-					features = append(features, Feature{Normal, s.LineNumber, s.ScenarioText, []object.TableData{}, filePath, s})
+					features = append(features, Feature{Normal, s.LineNumber, s.ScenarioText, []object.TableData{}, filePath, s, feature.Background})
 				}
 			}
 		}
