@@ -171,7 +171,9 @@ func checkAnd() error {
 					})
 				}
 			}
-			lastToken = s.Token.Type
+			if (s.Token.Type != token.AND) {
+				lastToken = s.Token.Type
+			}
 		}
 
 		input, err := ioutil.ReadFile(feature.FilePath)
