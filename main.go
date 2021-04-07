@@ -39,15 +39,15 @@ type shift struct {
 func getShifts() {
 	latestFeatures := getFeatures()
 
-	dat, err := ioutil.ReadFile("output.json")
+	oldFeatureData, err := ioutil.ReadFile("output.json")
 	if err != nil {
 		panic(err)
 	}
 
-	oldFeatures := []Feature{}
-	shifts := []shift{}
+	var oldFeatures []Feature
+	var shifts []shift
 
-	json.Unmarshal(dat, &oldFeatures)
+	_ = json.Unmarshal(oldFeatureData, &oldFeatures)
 
 	for _, l := range latestFeatures {
 		found := false
@@ -94,7 +94,7 @@ func getShifts() {
 
 	for _, f := range files {
 		if strings.HasPrefix(f.Name(), expectedFailuresPrefix) {
-			err = replaceOccuranceInFile(shifts, filepath.Join(expectedFailuresDir, f.Name()))
+			err = replaceOccurrenceInFile(shifts, filepath.Join(expectedFailuresDir, f.Name()))
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -104,7 +104,7 @@ func getShifts() {
 
 func inspect() bool {
 	latestFeatures := getFeatures()
-	atLeastOnefound := false
+	atLeastOneFound := false
 
 	for _, l := range latestFeatures {
 		found := false
@@ -120,25 +120,24 @@ func inspect() bool {
 			}
 			if found {
 				if o.LineNumber != l.LineNumber {
-					atLeastOnefound = true
-					fmt.Println("\nFound Scenarios with same title on same file")
-					fmt.Println("Old :", getTestPath(o))
-					fmt.Println("New: ", getTestPath(l))
+					atLeastOneFound = true
+					fmt.Println("\n-> Found Scenarios with same title on same file")
+					fmt.Println("\tScenario 1:", getTestPath(o))
+					fmt.Println("\tScenario 2:", getTestPath(l))
 				}
 				break
 			}
 		}
 	}
 
-	return atLeastOnefound
+	return atLeastOneFound
 }
 
 func checkDuplicates() {
 	hasDuplicates := inspect()
 	fmt.Println()
 	if hasDuplicates {
-		log.Fatal(fmt.Errorf("Duplicate Scenarios found"))
-		os.Exit(1)
+		log.Fatal(fmt.Errorf("opps! duplicate scenarios found"))
 	}
 }
 
@@ -197,8 +196,7 @@ func checkAnd() error {
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatal(fmt.Errorf("Opps, Seems like you forgot to provide the path of the feature file"))
-		os.Exit(1)
+		log.Fatal(fmt.Errorf("opps! seems like you forgot to provide the path of the feature file"))
 	}
 
 	switch os.Args[1] {
@@ -212,9 +210,11 @@ func main() {
 		checkDuplicates()
 	case "check_and":
 		checkAnd()
+	case "scan":
+		scanForNewScenarios()
+		scanForRemovedScenarios()
 	default:
-		log.Fatal(fmt.Errorf("Opps, Seems like you forgot to provide the path of the feature file"))
-		os.Exit(1)
+		log.Fatal(fmt.Errorf("opps! seems like you forgot to provide the path of the feature file"))
 	}
 }
 
@@ -235,24 +235,21 @@ func getFeatures() []Feature {
 	featuresPath := os.Getenv("FEATURES_PATH")
 
 	if featuresPath == "" {
-		log.Fatal(fmt.Errorf("Setup features Path with FEATURES_PATH env variable"))
-		os.Exit(1)
+		log.Fatal(fmt.Errorf("error: setup features path with FEATURES_PATH env variable"))
 	}
 
 	path := featuresPath
 	abs, err := filepath.Abs(path)
 	if err != nil {
-		log.Fatal(fmt.Errorf("Invalid path provided, Make sure the path %q is correct", path))
-		os.Exit(1)
+		log.Fatal(fmt.Errorf("error: invalid path provided, make sure the path %q is correct", path))
 	}
 
 	fi, err := os.Stat(abs)
 	if os.IsNotExist(err) {
-		log.Fatal(fmt.Errorf("Error, Make sure the path %q exists", abs))
-		os.Exit(1)
+		log.Fatal(fmt.Errorf("error: make sure the path %q exists", abs))
 	}
 
-	features := []Feature{}
+	var features []Feature
 
 	switch mode := fi.Mode(); {
 	case mode.IsDir():
@@ -260,7 +257,7 @@ func getFeatures() []Feature {
 			if err != nil {
 				return err
 			}
-			fileFeatures := []Feature{}
+			var fileFeatures []Feature
 			if !info.IsDir() {
 				if ext := filepath.Ext(info.Name()); ext == ".feature" {
 					fileFeatures = getFeaturesFromFile(path)
@@ -293,7 +290,7 @@ func cacheFeaturesData() {
 }
 
 func getFeaturesFromFile(filePath string) []Feature {
-	features := []Feature{}
+	var features []Feature
 	l := lexer.NewFromFile(filePath)
 	p := parser.New(l)
 	res := p.Parse()
@@ -344,7 +341,7 @@ func getGithubLinkPath(path string) string {
 	return fmt.Sprintf("%s#L%s", parts[0], parts[1])
 }
 
-func replaceOccuranceInFile(shifts []shift, filePath string) error {
+func replaceOccurrenceInFile(shifts []shift, filePath string) error {
 	input, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return err
@@ -355,8 +352,8 @@ func replaceOccuranceInFile(shifts []shift, filePath string) error {
 		newContents = strings.Replace(
 			newContents,
 			fmt.Sprintf("[%s]", shift.oldPath),
-			// adding extra line to avoid changing alreaady chantged line
-			fmt.Sprintf("[%s]", shift.newPath+"आफ्नै बादल"),
+			// adding extra line to avoid changing already changed line
+			fmt.Sprintf("[%s]", shift.newPath + "आफ्नै बादल"),
 			-1,
 		)
 	}
@@ -365,7 +362,7 @@ func replaceOccuranceInFile(shifts []shift, filePath string) error {
 		newContents = strings.Replace(
 			newContents,
 			fmt.Sprintf("%s)", getGithubLinkPath(shift.oldPath)),
-			// adding extra line to avoid changing alreaady chantged line
+			// adding extra line to avoid changing already changed line
 			fmt.Sprintf("%s%s)", getGithubLinkPath(shift.newPath), "आफ्नै बादल"),
 			-1,
 		)

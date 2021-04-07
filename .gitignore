@@ -1,2 +1,6 @@
+# features cache
 output.json
+# IDE Cache
 .idea/
+# BATS log files
+log*.bats
