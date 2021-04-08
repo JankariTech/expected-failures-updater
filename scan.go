@@ -33,7 +33,7 @@ func scanForNewScenarios() {
 			}
 		}
 		if !found {
-			fmt.Println("new scenario found")
+			fmt.Println("found new scenario")
 			fmt.Println("New: ", getTestPath(l))
 			fmt.Println("")
 		}
