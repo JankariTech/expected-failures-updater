@@ -3,14 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dpakach/gorkin/lexer"
-	"github.com/dpakach/gorkin/object"
-	"github.com/dpakach/gorkin/parser"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/dpakach/gorkin/lexer"
+	"github.com/dpakach/gorkin/object"
+	"github.com/dpakach/gorkin/parser"
+	"github.com/dpakach/gorkin/token"
 )
 
 type scenarioType string
@@ -26,6 +28,7 @@ type Feature struct {
 	Title      string             `json:"title"`
 	DataRow    []object.TableData `json:"data_row"`
 	FilePath   string             `json:"file_path"`
+	Scenario   *object.Scenario   `json:"-"`
 }
 
 type shift struct {
@@ -80,10 +83,9 @@ func getShifts() {
 	expectedFailuresDir := os.Getenv("EXPECTED_FAILURES_DIR")
 	expectedFailuresPrefix := os.Getenv("EXPECTED_FAILURES_PREFIX")
 
-	if (expectedFailuresPrefix == "") {
+	if expectedFailuresPrefix == "" {
 		expectedFailuresPrefix = "expected-failure"
 	}
-
 
 	files, err := ioutil.ReadDir(expectedFailuresDir)
 	if err != nil {
@@ -140,6 +142,59 @@ func checkDuplicates() {
 	}
 }
 
+func delete_empty(s []string) []string {
+	var r []string
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+	return r
+}
+
+func checkAnd() error {
+	latestFeatures := getFeatures()
+
+	for _, feature := range latestFeatures {
+		type update struct {
+			token      string
+			linenumber int
+		}
+		updates := []update{}
+		var lastToken token.Type
+		for _, s := range feature.Scenario.Steps {
+			if lastToken == token.GIVEN || lastToken == token.WHEN || lastToken == token.THEN {
+				if lastToken == s.Token.Type {
+					updates = append(updates, update{
+						s.Token.Type.String(),
+						s.Token.LineNumber,
+					})
+				}
+			}
+			if (s.Token.Type != token.AND) {
+				lastToken = s.Token.Type
+			}
+		}
+
+		input, err := ioutil.ReadFile(feature.FilePath)
+		if err != nil {
+			return err
+		}
+
+		content := strings.Split(string(input), "\n")
+		for _, u := range updates {
+			fmt.Printf("Replacing %s:%d from %s -> \"And\"\n", feature.FilePath, u.linenumber, u.token)
+			content[u.linenumber-1] = strings.Replace(content[u.linenumber-1], u.token, "And", 1) // strings.Join(replaceString, " ")
+		}
+
+		err = ioutil.WriteFile(feature.FilePath, []byte(strings.Join(content, "\n")), 0644)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		log.Fatal(fmt.Errorf("Opps, Seems like you forgot to provide the path of the feature file"))
@@ -155,6 +210,8 @@ func main() {
 		getShifts()
 	case "inspect":
 		checkDuplicates()
+	case "check_and":
+		checkAnd()
 	default:
 		log.Fatal(fmt.Errorf("Opps, Seems like you forgot to provide the path of the feature file"))
 		os.Exit(1)
@@ -177,7 +234,7 @@ func dataRowSame(d1, d2 []object.TableData) bool {
 func getFeatures() []Feature {
 	featuresPath := os.Getenv("FEATURES_PATH")
 
-	if (featuresPath == "") {
+	if featuresPath == "" {
 		log.Fatal(fmt.Errorf("Setup features Path with FEATURES_PATH env variable"))
 		os.Exit(1)
 	}
@@ -252,11 +309,11 @@ func getFeaturesFromFile(filePath string) []Feature {
 				if isOutline {
 					for i, s := range outlineObj.GetScenarios() {
 
-						features = append(features, Feature{Outline, s.LineNumber, s.ScenarioText, outlineObj.Table[i+1], filePath})
+						features = append(features, Feature{Outline, s.LineNumber, s.ScenarioText, outlineObj.Table[i+1], filePath, &s})
 					}
 				} else {
 					s, _ := scenario.(*object.Scenario)
-					features = append(features, Feature{Normal, s.LineNumber, s.ScenarioText, []object.TableData{}, filePath})
+					features = append(features, Feature{Normal, s.LineNumber, s.ScenarioText, []object.TableData{}, filePath, s})
 				}
 			}
 		}
@@ -280,7 +337,7 @@ func getTestSuite(feature Feature) string {
 
 func getGithubLinkPath(path string) string {
 	parts := strings.Split(path, ":")
-	if (len(parts) != 2) {
+	if len(parts) != 2 {
 		fmt.Println(parts)
 		log.Fatal("Could not parse path")
 	}
@@ -292,14 +349,14 @@ func replaceOccuranceInFile(shifts []shift, filePath string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	newContents := string(input)
 	for _, shift := range shifts {
 		newContents = strings.Replace(
 			newContents,
 			fmt.Sprintf("[%s]", shift.oldPath),
 			// adding extra line to avoid changing alreaady chantged line
-			fmt.Sprintf("[%s]", shift.newPath + "आफ्नै बादल"),
+			fmt.Sprintf("[%s]", shift.newPath+"आफ्नै बादल"),
 			-1,
 		)
 	}
@@ -315,7 +372,7 @@ func replaceOccuranceInFile(shifts []shift, filePath string) error {
 	}
 
 	// Remove added extra line
-	newContents = strings.Replace(newContents, "आफ्नै बादल",  "", -1)
+	newContents = strings.Replace(newContents, "आफ्नै बादल", "", -1)
 
 	err = ioutil.WriteFile(filePath, []byte(newContents), 0644)
 	if err != nil {
