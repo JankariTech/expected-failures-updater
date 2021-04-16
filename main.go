@@ -152,45 +152,40 @@ func delete_empty(s []string) []string {
 	return r
 }
 
+type update struct {
+	token      string
+	linenumber int
+}
+
+func getUpdatesFromSteps(steps []object.Step) []update {
+	var lastToken token.Type
+	updates := []update{}
+	for _, s := range steps {
+		if lastToken == token.GIVEN || lastToken == token.WHEN || lastToken == token.THEN {
+			if lastToken == s.Token.Type {
+				updates = append(updates, update{
+					s.Token.Type.String(),
+					s.Token.LineNumber,
+				})
+			}
+		}
+		if (s.Token.Type != token.AND) {
+			lastToken = s.Token.Type
+		}
+	}
+	return updates
+}
+
 func checkAnd() error {
 	latestFeatures := getFeatures()
 
+	var lastFeaturePath string
 	for _, feature := range latestFeatures {
-		type update struct {
-			token      string
-			linenumber int
-		}
 		updates := []update{}
-		var lastToken token.Type
-		for _, s := range feature.Scenario.Steps {
-			if lastToken == token.GIVEN || lastToken == token.WHEN || lastToken == token.THEN {
-				if lastToken == s.Token.Type {
-					updates = append(updates, update{
-						s.Token.Type.String(),
-						s.Token.LineNumber,
-					})
-				}
-			}
-			if (s.Token.Type != token.AND) {
-				lastToken = s.Token.Type
-			}
-		}
 
-		if (feature.Background != nil) {
-			var backgroundLastToken token.Type
-			for _, s := range feature.Background.Steps {
-				if backgroundLastToken == token.GIVEN || backgroundLastToken == token.WHEN || backgroundLastToken == token.THEN {
-					if backgroundLastToken == s.Token.Type {
-						updates = append(updates, update{
-							s.Token.Type.String(),
-							s.Token.LineNumber,
-						})
-					}
-				}
-				if (s.Token.Type != token.AND) {
-					backgroundLastToken = s.Token.Type
-				}
-			}
+		updates = append(updates, getUpdatesFromSteps(feature.Scenario.Steps)...)
+		if (lastFeaturePath != feature.FilePath && feature.Background != nil) {
+			updates = append(updates, getUpdatesFromSteps(feature.Background.Steps)...)
 		}
 
 		input, err := ioutil.ReadFile(feature.FilePath)
@@ -208,6 +203,7 @@ func checkAnd() error {
 		if err != nil {
 			return err
 		}
+		lastFeaturePath = feature.FilePath
 	}
 	return nil
 }
