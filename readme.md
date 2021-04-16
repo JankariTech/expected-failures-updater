@@ -8,29 +8,37 @@ go run main.go <command>
 ```
 
 ### Available commands
-- #### Inspect
+- #### inspect
     Check for any duplicate scenarios in your feature files
 
-    Required Env variables 
+    Required Env variables
 
     - `FEATURES_PATH` Path where the Features files are
 
 
-- #### Cache
+- #### cache
     Read the Feature files and store their information
 
-    Required Env variables 
+    Required Env variables
 
     - `FEATURES_PATH` Path where the Features files are
 
-- #### Shift
+- #### shift
     Update the expected Failure files
 
-    Required Env variables 
+    Required Env variables
 
     - `FEATURES_PATH` Path where the Features files are
     - `EXPECTED_FAILURES_DIR` Path were expected failures files are
     - `EXPECTED_FAILURES_PREFIX` Prefix of the expected failure files in expectged failures dir (defaults to `expected-failure`)
+
+- #### check-and
+    Replace subsequent Given, Given steps with Given, And
+
+    Required Env variables
+
+    - `FEATURES_PATH` Path where the Features files are
+
 
 ### Instructions
 - First check the .drone.env of the respective project to see the last version of testrunner used.
