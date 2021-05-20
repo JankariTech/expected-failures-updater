@@ -4,3 +4,6 @@ output.json
 .idea/
 # BATS log files
 log*.bats
+
+# build binary
+ocBddKit
