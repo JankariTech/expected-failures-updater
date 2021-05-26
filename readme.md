@@ -40,6 +40,13 @@ go run main.go <command>
     - `FEATURES_PATH` Path where the Features files are
 
 
+- #### scan
+    Check for newly added scenarios or deleted scenarios since last cache
+
+    Required Env variables
+
+    - `FEATURES_PATH` Path where the Features files are
+
 ### Instructions
 - First check the .drone.env of the respective project to see the last version of testrunner used.
 - Checkout to that version in the testrunner repo and cache the feature data with

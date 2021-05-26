@@ -8,7 +8,7 @@ function setup() {
 
 	# cache the existing feature
 	export FEATURES_PATH=tests/fixtures/features
-	make cache
+	go run main.go cache
 }
 
 
@@ -17,7 +17,7 @@ function setup() {
 	sed -i '27,29d' tests/fixtures/features/superHeroes/hero.feature
 
 	# scan the cached feature directory
-	run make scan
+	run go run main.go scan
 	[ "$status" -eq 0 ]
 	[ "${lines[1]}" = "scenario got removed" ]
 	[ "${lines[2]}" = "Deleted:  superHeroes/hero.feature:27" ]
@@ -28,7 +28,7 @@ function setup() {
 	echo -e "\n  Scenario: new scene\n    When this\n    Then that\n" >> tests/fixtures/features/superHeroes/hero.feature
 
 	# scan the cached feature directory
-	run make scan
+	run go run main.go scan
 
 	[ "$status" -eq 0 ]
 	[ "${lines[1]}" = "found new scenario" ]
