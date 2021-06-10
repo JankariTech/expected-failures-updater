@@ -2,6 +2,12 @@ github.com/dpakach/gorkin v0.0.0-20210324081727-c2ae503817f7 h1:9U1AXGD/uMvtKvm0
 github.com/dpakach/gorkin v0.0.0-20210324081727-c2ae503817f7/go.mod h1:HN8WsaX9IR0X3gzPywr7eVNhBe0xOn0U8rLM16cFa9Y=
 github.com/dpakach/gorkin v0.0.0-20210327132359-66e6ffd4b422 h1:m3Mc6cZ0bmr6vWFRy/5C9Fsc88DjQNw81kUQ3mLumXI=
 github.com/dpakach/gorkin v0.0.0-20210327132359-66e6ffd4b422/go.mod h1:HN8WsaX9IR0X3gzPywr7eVNhBe0xOn0U8rLM16cFa9Y=
+github.com/dpakach/gorkin v0.0.0-20210610093516-183c6aa4f8bc h1:xCVk7WYDQI38Ka0C6kfB6AnyDBOhIs1apasX6bedkf0=
+github.com/dpakach/gorkin v0.0.0-20210610093516-183c6aa4f8bc/go.mod h1:HN8WsaX9IR0X3gzPywr7eVNhBe0xOn0U8rLM16cFa9Y=
+github.com/dpakach/gorkin v0.0.0-20210610124553-5594be1db6f1 h1:xQtFVkFICun1apoAjdBqf3QrQxbRdZNfiYVgKckdy2g=
+github.com/dpakach/gorkin v0.0.0-20210610124553-5594be1db6f1/go.mod h1:HN8WsaX9IR0X3gzPywr7eVNhBe0xOn0U8rLM16cFa9Y=
+github.com/dpakach/gorkin v1.0.1 h1:duIgYCQHpwKSY6mvjnnNPTG0+GY+NG1bRJMrPmMfu1c=
+github.com/dpakach/gorkin v1.0.1/go.mod h1:HN8WsaX9IR0X3gzPywr7eVNhBe0xOn0U8rLM16cFa9Y=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=

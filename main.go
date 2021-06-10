@@ -357,9 +357,12 @@ func getFeaturesFromFile(filePath string) []Feature {
 				outlineObj, ok := scenario.(*object.ScenarioOutline)
 				isOutline := ok
 				if isOutline {
+					fullTables := object.Table{}
+					for _, table := range outlineObj.Tables {
+						fullTables.Append(table)
+					}
 					for i, s := range outlineObj.GetScenarios() {
-
-						features = append(features, Feature{Outline, s.LineNumber, s.ScenarioText, outlineObj.Table[i+1], filePath, &s, feature.Background})
+						features = append(features, Feature{Outline, s.LineNumber, s.ScenarioText, fullTables[i+1], filePath, &s, feature.Background})
 					}
 				} else {
 					s, _ := scenario.(*object.Scenario)
