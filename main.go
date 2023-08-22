@@ -102,8 +102,8 @@ func getShifts(out io.Writer) int {
 
 	if expectedFailuresPrefix == "" {
 		io.WriteString(out, "Expected Failures prefix not provided\n")
-		io.WriteString(out, "using 'expected-failure as prefix of expected failure files by default'\n")
-		expectedFailuresPrefix = "expected-failure"
+		io.WriteString(out, "using 'expected-failures' as prefix of expected failure files by default\n")
+		expectedFailuresPrefix = "expected-failures"
 	}
 
 	files, err := ioutil.ReadDir(expectedFailuresDir)

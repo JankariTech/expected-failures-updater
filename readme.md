@@ -30,7 +30,7 @@ go run main.go <command>
 
     - `FEATURES_PATH` Path where the Features files are
     - `EXPECTED_FAILURES_DIR` Path were expected failures files are
-    - `EXPECTED_FAILURES_PREFIX` Prefix of the expected failure files in expectged failures dir (defaults to `expected-failure`)
+    - `EXPECTED_FAILURES_PREFIX` Prefix of the expected failure files in expectged failures dir (defaults to `expected-failures`)
 
 - #### check-and
     Replace subsequent Given, Given steps with Given, And
