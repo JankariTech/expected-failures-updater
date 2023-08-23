@@ -2,21 +2,26 @@ name: CI
 
 on:
   push:
-    branches: [ added-github-actions ]
+    branches: [ main ]
   pull_request:
 
 jobs:
-  go:
+  build:
     runs-on: ubuntu-latest
     steps:    
       - name: Checkout code
-        #basically command in linux which basically checkout the code
         uses: actions/checkout@v2
 
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.15'
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.54
+          run: golangci-lint
 
       - name: Display Go version
         run: go version
@@ -26,7 +31,7 @@ jobs:
         with:
           bats-version: 1.2.1
 
-      - name: bats run
+      - name: Run bats test
         working-directory: ./
         run: |
           bats tests/test_scan_command.bats
