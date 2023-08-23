@@ -21,7 +21,12 @@ jobs:
       - name: Display Go version
         run: go version
 
-      - name: inspect run
+      - name: Setup BATS
+        uses: mig4/setup-bats@v1
+        with:
+          bats-version: 1.2.1
+
+      - name: bats run
         working-directory: ./
         run: |
-          FEATURES_PATH=tests/fixtures/features/ go run main.go inspect
+          bats tests/test_scan_command.bats
