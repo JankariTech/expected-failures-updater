@@ -14,6 +14,10 @@ Feature: hero feature
     When the superhero is online
     Then citizens should be safe
 
+  Scenario: saviour of the city
+    When the superhero is online
+    Then citizens should be safe
+
   Scenario Outline: superheros and their cloaks
     Given laboratory has summoned "<super-hero>"
     When the hero files on the sky
