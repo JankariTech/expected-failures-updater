@@ -2,16 +2,26 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ added-github-actions ]
   pull_request:
 
 jobs:
   go:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+    steps:    
+      - name: Checkout code
+        #basically command in linux which basically checkout the code
+        uses: actions/checkout@v2
 
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.15'
+
+      - name: Display Go version
+        run: go version
+
+      - name: inspect run
+        working-directory: ./
+        run: |
+          FEATURES_PATH=tests/fixtures/features/ go run main.go inspect
