@@ -22,9 +22,6 @@ jobs:
         with:
           version: v1.54
 
-      - name: Display Go version
-        run: go version
-
       - name: Setup BATS
         uses: mig4/setup-bats@v1
         with:
