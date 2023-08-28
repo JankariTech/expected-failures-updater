@@ -44,6 +44,15 @@ type shift struct {
 	newPath string
 }
 
+func writeString(out io.Writer, msg string) (error){
+	_, err := io.WriteString(out, msg)
+	if err != nil {
+		io.WriteString(out, err.Error())
+		return err
+	}
+	return nil
+}
+
 func getShifts(out io.Writer) int {
 	latestFeatures := getFeatures()
 
@@ -71,11 +80,11 @@ func getShifts(out io.Writer) int {
 			}
 			if found {
 				if o.LineNumber != l.LineNumber {
-					io.WriteString(out, "Found Shift\n")
-					io.WriteString(out, "Old: "+getTestPath(o))
-					io.WriteString(out, "\n")
-					io.WriteString(out, "New: "+getTestPath(l))
-					io.WriteString(out, "\n\n")
+					writeString(out, "Found Shift\n")
+					writeString(out, "Old: "+getTestPath(o))
+					writeString(out, "\n")
+					writeString(out, "New: "+getTestPath(l))
+					writeString(out, "\n\n")
 
 					shifts = append(shifts, shift{getTestPath(o), getTestPath(l)})
 				}
@@ -166,16 +175,6 @@ func checkDuplicates(out io.Writer) int {
 	return 0
 }
 
-func deleteEmpty(s []string) []string {
-	var r []string
-	for _, str := range s {
-		if str != "" {
-			r = append(r, str)
-		}
-	}
-	return r
-}
-
 type update struct {
 	token      string
 	linenumber int
@@ -260,7 +259,7 @@ func main() {
 			exitStatus += scanForNewScenarios(out)
 			exitStatus += scanForRemovedScenarios(out)
 		default:
-			io.WriteString(out, "opps! seems like you forgot to provide the path of the feature file")
+			writeString(out, "opps! seems like you forgot to provide the path of the feature file")
 			exitStatus++
 		}
 	}
