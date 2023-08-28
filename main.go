@@ -44,10 +44,10 @@ type shift struct {
 	newPath string
 }
 
-func writeString(out io.Writer, msg string) (error){
+func writeString(out io.Writer, msg string) error {
 	_, err := io.WriteString(out, msg)
 	if err != nil {
-		io.WriteString(out, err.Error())
+		_, _ = io.WriteString(out, err.Error()) // Writing error message
 		return err
 	}
 	return nil
@@ -81,10 +81,8 @@ func getShifts(out io.Writer) int {
 			if found {
 				if o.LineNumber != l.LineNumber {
 					writeString(out, "Found Shift\n")
-					writeString(out, "Old: "+getTestPath(o))
-					writeString(out, "\n")
-					writeString(out, "New: "+getTestPath(l))
-					writeString(out, "\n\n")
+					_, _ = io.WriteString(out, "New: "+getTestPath(l)+"\n")
+					_, _ = io.WriteString(out, "\n\n")
 
 					shifts = append(shifts, shift{getTestPath(o), getTestPath(l)})
 				}
