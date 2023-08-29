@@ -1,4 +1,4 @@
-name: tests
+name: CI
 
 on:
   push:
@@ -35,4 +35,4 @@ jobs:
       - name: Run bats test
         working-directory: ./
         run: |
-          bats tests/test_scan_command.bats
+          bats tests/<path-to-the-test-file> 
