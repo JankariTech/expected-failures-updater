@@ -58,3 +58,12 @@ go run main.go <command>
     FEATURES_PATH=<path_to_feature_files> EXPECTED_FAILURES_DIR=<path_to_expected_failures> go run main.go shift
     ```
 
+### Run test
+- Install Bats (Bash Automated Testing System) on your system using the following command:
+    ```bash
+    sudo apt install bats
+    ```      
+- After installing Bats, you can run your tests locally from the base directory of this project using the following command:
+    ```bash 
+    bats tests/*.bats  
+    ```

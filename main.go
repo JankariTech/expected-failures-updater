@@ -71,11 +71,9 @@ func getShifts(out io.Writer) int {
 			}
 			if found {
 				if o.LineNumber != l.LineNumber {
-					io.WriteString(out, "Found Shift\n")
-					io.WriteString(out, "Old: "+getTestPath(o))
-					io.WriteString(out, "\n")
-					io.WriteString(out, "New: "+getTestPath(l))
-					io.WriteString(out, "\n\n")
+					_, _ = io.WriteString(out, "Found Shift\n")
+					_, _ = io.WriteString(out, "New: "+getTestPath(l)+"\n")
+					_, _ = io.WriteString(out, "\n\n")
 
 					shifts = append(shifts, shift{getTestPath(o), getTestPath(l)})
 				}
@@ -84,31 +82,31 @@ func getShifts(out io.Writer) int {
 		}
 
 		if !found {
-			io.WriteString(out, "new scenario found\n")
-			io.WriteString(out, "New: "+getTestPath(l))
-			io.WriteString(out, "\n\n")
+			_, _ = io.WriteString(out, "new scenario found\n")
+			_, _ = io.WriteString(out, "New: "+getTestPath(l))
+			_, _ = io.WriteString(out, "\n\n")
 		}
 	}
 
 	expectedFailuresDir := os.Getenv("EXPECTED_FAILURES_DIR")
 	if expectedFailuresDir == "" {
-		io.WriteString(out, "Expected Failures directory not provided\n")
-		io.WriteString(out, "Please use EXPECTED_FAILURES_DIR env variable to provide path to directory where expected failure files are\n")
-		io.WriteString(out, "\n")
+		_, _ = io.WriteString(out, "Expected Failures directory not provided\n")
+		_, _ = io.WriteString(out, "Please use EXPECTED_FAILURES_DIR env variable to provide path to directory where expected failure files are\n")
+		_, _ = io.WriteString(out, "\n")
 		return 1
 	}
 
 	expectedFailuresPrefix := os.Getenv("EXPECTED_FAILURES_PREFIX")
 
 	if expectedFailuresPrefix == "" {
-		io.WriteString(out, "Expected Failures prefix not provided\n")
-		io.WriteString(out, "using 'expected-failures' as prefix of expected failure files by default\n")
+		_, _ = io.WriteString(out, "Expected Failures prefix not provided\n")
+		_, _ = io.WriteString(out, "using 'expected-failures' as prefix of expected failure files by default\n")
 		expectedFailuresPrefix = "expected-failures"
 	}
 
 	files, err := ioutil.ReadDir(expectedFailuresDir)
 	if err != nil {
-		io.WriteString(out, err.Error())
+		_, _ = io.WriteString(out, err.Error())
 		return 1
 	}
 
@@ -116,7 +114,7 @@ func getShifts(out io.Writer) int {
 		if strings.HasPrefix(f.Name(), expectedFailuresPrefix) {
 			err = replaceOccurrenceInFile(shifts, filepath.Join(expectedFailuresDir, f.Name()))
 			if err != nil {
-				io.WriteString(out, err.Error())
+				_, _ = io.WriteString(out, err.Error())
 				return 1
 			}
 		}
@@ -143,9 +141,9 @@ func inspect(out io.Writer) bool {
 			if found {
 				if o.LineNumber != l.LineNumber {
 					atLeastOneFound = true
-					io.WriteString(out, "-> Found Scenarios with same title on same file\n")
-					io.WriteString(out, fmt.Sprintf("\tScenario 1: %s\n", getTestPath(o)))
-					io.WriteString(out, fmt.Sprintf("\tScenario 2: %s\n", getTestPath(l)))
+					_, _ = io.WriteString(out, "-> Found Scenarios with same title on same file\n")
+					_, _ = io.WriteString(out, fmt.Sprintf("\tScenario 1: %s\n", getTestPath(o)))
+					_, _ = io.WriteString(out, fmt.Sprintf("\tScenario 2: %s\n", getTestPath(l)))
 				}
 				break
 			}
@@ -157,15 +155,16 @@ func inspect(out io.Writer) bool {
 
 func checkDuplicates(out io.Writer) int {
 	hasDuplicates := inspect(out)
-	io.WriteString(out, "\n")
+	_, _ = io.WriteString(out, "\n")
 	if hasDuplicates {
-		io.WriteString(out, "\n")
-		io.WriteString(out, "Duplicate scenarios found\n")
+		_, _ = io.WriteString(out, "\n")
+		_, _ = io.WriteString(out, "Duplicate scenarios found\n")
 		return 1
 	}
 	return 0
 }
 
+//lint:ignore U1000 Ignore unused function deleteEmpty
 func deleteEmpty(s []string) []string {
 	var r []string
 	for _, str := range s {
@@ -214,21 +213,21 @@ func checkAnd(out io.Writer) int {
 
 		input, err := ioutil.ReadFile(feature.FilePath)
 		if err != nil {
-			io.WriteString(out, err.Error())
-			io.WriteString(out, "\n")
+			_, _ = io.WriteString(out, err.Error())
+			_, _ = io.WriteString(out, "\n")
 			return 1
 		}
 
 		content := strings.Split(string(input), "\n")
 		for _, u := range updates {
-			io.WriteString(out, fmt.Sprintf("Replacing %s from %s -> \"And\"\n\n", getTestPath(feature), u.token))
+			_, _ = io.WriteString(out, fmt.Sprintf("Replacing %s from %s -> \"And\"\n\n", getTestPath(feature), u.token))
 			content[u.linenumber-1] = strings.Replace(content[u.linenumber-1], u.token, "And", 1) // strings.Join(replaceString, " ")
 		}
 
 		err = ioutil.WriteFile(feature.FilePath, []byte(strings.Join(content, "\n")), 0644)
 		if err != nil {
-			io.WriteString(out, err.Error())
-			io.WriteString(out, "\n")
+			_, _ = io.WriteString(out, err.Error())
+			_, _ = io.WriteString(out, "\n")
 			return 1
 		}
 		lastFeaturePath = feature.FilePath
@@ -260,11 +259,11 @@ func main() {
 			exitStatus += scanForNewScenarios(out)
 			exitStatus += scanForRemovedScenarios(out)
 		default:
-			io.WriteString(out, "opps! seems like you forgot to provide the path of the feature file")
+			_, _ = io.WriteString(out, "opps! seems like you forgot to provide the path of the feature file")
 			exitStatus++
 		}
 	}
-	io.Copy(os.Stdout, out)
+	_, _= io.Copy(os.Stdout, out)
 	os.Exit(exitStatus)
 }
 
@@ -335,8 +334,8 @@ func cacheFeaturesData(out io.Writer) int {
 	err := ioutil.WriteFile("output.json", bolB, 0644)
 
 	if err != nil {
-		io.WriteString(out, err.Error())
-		io.WriteString(out, "\n")
+		_, _ = io.WriteString(out, err.Error())
+		_, _ = io.WriteString(out, "\n")
 		return 1
 	}
 	return 0
@@ -438,7 +437,7 @@ func scanForNewScenarios(out io.Writer) int {
 	latestFeatures := getFeatures()
 	oldFeaturesData, err := ioutil.ReadFile("output.json")
 	if err != nil {
-		io.WriteString(out, err.Error())
+		_, _ = io.WriteString(out, err.Error())
 		return 1
 	}
 
@@ -459,9 +458,9 @@ func scanForNewScenarios(out io.Writer) int {
 			}
 		}
 		if !found {
-			io.WriteString(out, "found new scenario\n")
-			io.WriteString(out, "New: "+getTestPath(l))
-			io.WriteString(out, "\n\n")
+			_, _ = io.WriteString(out, "found new scenario\n")
+			_, _ = io.WriteString(out, "New: "+getTestPath(l))
+			_, _ = io.WriteString(out, "\n\n")
 		}
 	}
 	return 0
@@ -472,7 +471,7 @@ func scanForRemovedScenarios(out io.Writer) int {
 	latestFeatures := getFeatures()
 	oldFeaturesData, err := ioutil.ReadFile("output.json")
 	if err != nil {
-		io.WriteString(out, err.Error())
+		_, _ = io.WriteString(out, err.Error())
 		return 1
 	}
 
@@ -493,28 +492,28 @@ func scanForRemovedScenarios(out io.Writer) int {
 			}
 		}
 		if !found {
-			io.WriteString(out, "scenario got removed\n")
-			io.WriteString(out, "Deleted: "+getTestPath(o))
-			io.WriteString(out, "\n\n")
+			_, _ = io.WriteString(out, "scenario got removed\n")
+			_, _ = io.WriteString(out, "Deleted: "+getTestPath(o))
+			_, _ = io.WriteString(out, "\n\n")
 		}
 	}
 	return 0
 }
 
 func help(out io.Writer) int {
-	io.WriteString(out, "ocBddKit " + version + ", A tool to manage feature files for ownCloud\n")
-	io.WriteString(out, "Usage: ocBddKit <option>\n\n")
-	io.WriteString(out, "Available Options:\n")
-	io.WriteString(out, "\thelp    - to display this help message\n")
-	io.WriteString(out, "\tinspect - to inspect the feature file/dir if acceptable for caching\n")
-	io.WriteString(out, "\tcache   - to cache a feature file/dir\n")
-	io.WriteString(out, "\tshift   - to update the expected failures files\n")
-	io.WriteString(out, "\tscan    - to scan if new scenarios were added or old scenarios were deleted\n")
-	io.WriteString(out, "\n")
+	_, _ = io.WriteString(out, "ocBddKit " + version + ", A tool to manage feature files for ownCloud\n")
+	_, _ = io.WriteString(out, "Usage: ocBddKit <option>\n\n")
+	_, _ = io.WriteString(out, "Available Options:\n")
+	_, _ = io.WriteString(out, "\thelp    - to display this help message\n")
+	_, _ = io.WriteString(out, "\tinspect - to inspect the feature file/dir if acceptable for caching\n")
+	_, _ = io.WriteString(out, "\tcache   - to cache a feature file/dir\n")
+	_, _ = io.WriteString(out, "\tshift   - to update the expected failures files\n")
+	_, _ = io.WriteString(out, "\tscan    - to scan if new scenarios were added or old scenarios were deleted\n")
+	_, _ = io.WriteString(out, "\n")
 
-	io.WriteString(out, "Instructions:\n")
-	io.WriteString(out, "\t Use the existing commitID in .drone.env from respective projects to 'inspect' and 'cache'\n")
-	io.WriteString(out, "\t Then, checkout to the latest version of that project.\n")
-	io.WriteString(out, "\t After that, update the expected failures files with 'shift' command or 'scan' for new or removed scenarios\n")
+	_, _ = io.WriteString(out, "Instructions:\n")
+	_, _ = io.WriteString(out, "\t Use the existing commitID in .drone.env from respective projects to 'inspect' and 'cache'\n")
+	_, _ = io.WriteString(out, "\t Then, checkout to the latest version of that project.\n")
+	_, _ = io.WriteString(out, "\t After that, update the expected failures files with 'shift' command or 'scan' for new or removed scenarios\n")
 	return 0
 }
