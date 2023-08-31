@@ -164,6 +164,17 @@ func checkDuplicates(out io.Writer) int {
 	return 0
 }
 
+//lint:ignore U1000 Ignore unused function deleteEmpty
+func deleteEmpty(s []string) []string {
+	var r []string
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+	return r
+}
+
 type update struct {
 	token      string
 	linenumber int
