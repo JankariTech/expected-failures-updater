@@ -40,5 +40,4 @@ jobs:
 
       - name: Run bats test
         working-directory: ./
-        run: |
-          bats tests/*.bats
+        run: bats tests/*.bats

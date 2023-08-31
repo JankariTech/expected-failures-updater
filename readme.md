@@ -65,5 +65,5 @@ go run main.go <command>
     ```      
 - After installing Bats, you can run your tests locally from the base directory of this project using the following command:
     ```bash 
-    bats tests/test_scan_command.bats  
+    bats tests/*.bats  
     ```
