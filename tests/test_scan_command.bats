@@ -19,8 +19,8 @@ function setup() {
 	# scan the cached feature directory
 	run go run main.go scan
 	[ "$status" -eq 0 ]
-	[ "${lines[1]}" = "scenario got removed" ]
-	[ "${lines[2]}" = "Deleted:  superHeroes/hero.feature:27" ]
+	[ "${lines[0]}" = "scenario got removed" ]
+	[ "${lines[1]}" = "Deleted: superHeroes/hero.feature:27" ]
 }
 
 @test "detect new added scenarios" {
@@ -31,8 +31,8 @@ function setup() {
 	run go run main.go scan
 
 	[ "$status" -eq 0 ]
-	[ "${lines[1]}" = "found new scenario" ]
-	[ "${lines[2]}" = "New:  superHeroes/hero.feature:31" ]
+	[ "${lines[0]}" = "found new scenario" ]
+	[ "${lines[1]}" = "New: superHeroes/hero.feature:31" ]
 }
 
 function teardown() {
